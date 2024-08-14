@@ -26,7 +26,7 @@ jobs:
       - uses: tibdex/backport@v2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          backport_branch: 'backport-branch' # Replace with your target branch name
+          backport_branch: 'release-0.1' # Replace with your target branch name
           pr_number: ${{ github.event.pull_request.number }}
           labels: |
             cherry-pick
