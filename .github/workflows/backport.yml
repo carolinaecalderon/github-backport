@@ -3,7 +3,7 @@ on:
   pull_request_target:
     types:
       - closed
-      #- labeled Commenting this out for now, I think we only want to backport when the PR is closed.
+      - labeled
 
 jobs:
   backport:
@@ -14,20 +14,19 @@ jobs:
       pull-requests: write
     # Only react to merged PRs for security reasons.
     # See https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request_target.
+    # contains(github.event.pull_request.labels.*.name, 'backport')
     if: |
       github.event.pull_request.merged == true && (
         github.event.action == 'closed' || (
           github.event.action == 'labeled' && 
-          contains(github.event.pull_request.labels.*.name, 'backport')
+          contains(github.event.label.name, 'backport')
         )
       )
-     
+  
     steps:
       - uses: tibdex/backport@v2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          backport_branch: 'release-0.1' # Replace with your target branch name
-          pr_number: ${{ github.event.pull_request.number }}
-          labels: |
-            cherry-pick
-          commit_message_suffix: ' Backporting to supported releases: (backported)'
+          label_pattern: '^release-(.+)$'  # Regex to match the backport branch label, "release-XYZ"
+          title_template: '[BACKPORT {{base}}] {{title}}'
+          head_template: 'This is an automated backport of PR {{number}} to branch {{base}}'
