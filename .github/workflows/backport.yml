@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     # Only react to merged PRs for security reasons.
     # See https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request_target.
+    permissions:
+      contents: write
+      pull-requests: write
     if: >
       github.event.pull_request.merged
       && (
