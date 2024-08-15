@@ -26,4 +26,20 @@ jobs:
       - uses: tibdex/backport@v2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          title_template: "<%= title %> (backport #<%= number %>)"
+          title_template: "[AUTO-BACKPORT] <%= title %>"
+
+  auto-merge-backpot:
+    runs-on: ubuntu-latest
+    needs: backport  # Ensures this job runs after the 'backport' job
+    if: success()
+    steps:
+      - name: Get PR number and merge backport PR
+        run: |
+            PR_NUMBER=$(gh pr list --repo ${{ github.repository }} --search '[AUTO-BACKPORT] <%= title %>' --json number --jq '.[0].number')
+            if [ -n "$PR_NUMBER" ]; then
+              gh pr merge $PR_NUMBER --merge --repo ${{ github.repository }} --admin --comment "Auto-merged backport PR."
+            else
+              echo "No backport PR found to merge."
+            fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
