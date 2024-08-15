@@ -37,8 +37,10 @@ jobs:
         # TODO add a sleep step?
 
       - name: merge backported PR
+        id: merge_backport_pr
+        if: success()
         run: |
-            PR_NUMBER=$(gh pr list --repo ${{ github.repository }} --search "[AUTO-BACKPORT ${{github.event.pull_request.number}}]" --json number --jq '.[0].number')
+            PR_NUMBER=$(gh pr list --repo ${{ github.repository }} --search "[AUTO-BACKPORT ${{ github.event.pull_request.number }}]" --json number --jq '.[0].number')
             if [ -n "$PR_NUMBER" ]; then
               gh pr merge $PR_NUMBER --merge --repo ${{ github.repository }} --admin -t "Auto-merged backport PR."
             else
@@ -46,4 +48,15 @@ jobs:
             fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # TODO add a cleanup step for branch
+      
+      - name: delete backport branch
+        if: success()
+        run: |
+          BACKPORT_BRANCH=$(gh pr list --repo ${{ github.repository }} --search "backport-${{ github.event.pull_request.number }}-*" --json headRefName --jq '.[0].headRefName')
+          if [ -n "$BACKPORT_BRANCH" ]; then
+            # Delete the backport branch
+            gh repo delete-branch $BACKPORT_BRANCH --repo ${{ github.repository }}
+            echo "Deleted branch $BACKPORT_BRANCH"
+          else
+            echo "No backport PR found to delete."
+          fi
