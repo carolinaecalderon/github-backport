@@ -36,6 +36,6 @@ jobs:
 
       - name: merge backported PR
         run: |
-            gh pr merge github.event.pull_request.number --merge --repo ${{ github.repository }} --admin --comment "Auto-merged backport PR."
+            gh pr merge github.event.pull_request.number --auto --merge --repo ${{ github.repository }} --admin --t "Auto-merged backport PR."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
