@@ -1,2 +1,2 @@
 The quick brown fox jumps beneath the lazy dog.
-Hello, moon.
+Hello, moon. Goodbye, sun.
